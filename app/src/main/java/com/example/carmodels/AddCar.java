@@ -19,10 +19,9 @@ import com.google.firebase.storage.StorageReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.content.Intent;
 import android.net.Uri;
 
-public class Dashboard extends AppCompatActivity {
+public class AddCar extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private StorageReference storageReference;
     private ImageView carImg;
@@ -33,7 +32,7 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dashboard);
+        setContentView(R.layout.activity_addcar);
 
         initViews();
         carImg.setOnClickListener(new View.OnClickListener() {
