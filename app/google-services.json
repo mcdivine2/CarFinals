@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "228526763012",
+    "firebase_url": "https://carapdb-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "carapdb",
+    "storage_bucket": "carapdb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228526763012:android:0d685be4673dbff5371951",
+        "android_client_info": {
+          "package_name": "com.example.carmodels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "228526763012-4m8ftf05pjk8jitbuk34p6ssdf8u5qai.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl7_R0P9zcJ6ORGKQaHTwWmrtXjS3ieQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "228526763012-4m8ftf05pjk8jitbuk34p6ssdf8u5qai.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
