@@ -12,8 +12,17 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import android.content.Intent;
+import android.net.Uri;
+
 
 public class Signup extends AppCompatActivity {
+
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private Uri selectedImageUri;
     private ImageView userImg;
     private EditText name,email,password,retypePassword;
     private Button signNow;
@@ -27,6 +36,10 @@ public class Signup extends AppCompatActivity {
         initClickBtn();
 
         mAuth = FirebaseAuth.getInstance();
+        userImg.setOnClickListener(v -> {
+            openImageChooser(); // Open image chooser when the user clicks on the image view
+        });
+
 
     }
 
@@ -55,17 +68,34 @@ public class Signup extends AppCompatActivity {
             Toast.makeText(Signup.this, "Password does not meet criteria", Toast.LENGTH_SHORT).show();
         } else if (!userPassword.equals(userRetypePassword)) {
             Toast.makeText(Signup.this, "Password does not password doesn't match", Toast.LENGTH_SHORT).show();
+        } else if (selectedImageUri == null) {
+            Toast.makeText(Signup.this, "Please select a profile picture", Toast.LENGTH_SHORT).show();
         } else {
             mAuth.createUserWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                            Toast.makeText(Signup.this, "Register Success", Toast.LENGTH_SHORT).show();
+                            String userId = firebaseUser.getUid();
 
-                            // Move intent to start the Login activity here, upon successful registration
-                            Intent intent = new Intent(Signup.this, Login.class);
-                            startActivity(intent);
-                            finish(); // Finish the current activity (Signup)
+                            // Create a reference to the Firebase Storage location for user's profile picture
+                            StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+                                    .child("users/" + userId + "/profile.jpg"); // Adjust file name and path as needed
+
+                            // Upload the selected image to Firebase Storage
+                            storageRef.putFile(selectedImageUri)
+                                    .addOnSuccessListener(taskSnapshot -> {
+                                        // Image uploaded successfully
+                                        Toast.makeText(Signup.this, "Image uploaded to Firebase Storage", Toast.LENGTH_SHORT).show();
+
+                                        // Move intent to start the Login activity here, upon successful registration
+                                        Intent intent = new Intent(Signup.this, Login.class);
+                                        startActivity(intent);
+                                        finish(); // Finish the current activity (Signup)
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Handle unsuccessful image upload
+                                        Toast.makeText(Signup.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
                         } else {
                             Toast.makeText(Signup.this, "Register Fail", Toast.LENGTH_SHORT).show();
                             // User creation failed, stay on the same activity for correction
@@ -95,7 +125,6 @@ public class Signup extends AppCompatActivity {
 
         return email.matches(emailPattern);
     }
-
     private void initClickBtn() {
         signNow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,5 +133,20 @@ public class Signup extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void openImageChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            selectedImageUri = data.getData();
+            userImg.setImageURI(selectedImageUri); // Display the selected image in the ImageView
+        }
     }
 }
