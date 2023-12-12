@@ -16,16 +16,18 @@ import java.util.List;
 public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
 
     private List<Car> carList;
+    private OnDeleteCarClickListener onDeleteCarClickListener; // Define the interface variable
 
-    public CarAdapter(List<Car> carList) {
+    public CarAdapter(List<Car> carList, OnDeleteCarClickListener onDeleteCarClickListener) {
         this.carList = carList;
+        this.onDeleteCarClickListener = onDeleteCarClickListener; // Initialize the interface variable
     }
 
     @NonNull
     @Override
     public CarViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.carview, parent, false);
-        return new CarViewHolder(view);
+        return new CarViewHolder(view, onDeleteCarClickListener); // Pass the interface listener
     }
 
     @Override
@@ -42,14 +44,25 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
     public static class CarViewHolder extends RecyclerView.ViewHolder {
         TextView carNameTextView, carModelTextView, carYearTextView, carPriceTextView;
         ImageView carImageView;
+        OnDeleteCarClickListener onDeleteCarClickListener; // Interface listener variable
 
-        public CarViewHolder(@NonNull View itemView) {
+        public CarViewHolder(@NonNull View itemView, OnDeleteCarClickListener onDeleteCarClickListener) {
             super(itemView);
             carNameTextView = itemView.findViewById(R.id.txtCarName);
             carModelTextView = itemView.findViewById(R.id.txtCarModel);
             carYearTextView = itemView.findViewById(R.id.txtCarYear);
             carPriceTextView = itemView.findViewById(R.id.txtCarPrice);
-            carImageView = itemView.findViewById(R.id.carImg); // Add this line to initialize carImageView
+            carImageView = itemView.findViewById(R.id.carImg);
+
+            // Initialize the interface listener
+            this.onDeleteCarClickListener = onDeleteCarClickListener;
+
+            // Set onClickListener for the delete button
+            itemView.findViewById(R.id.btnDeleteCar).setOnClickListener(v -> {
+                if (onDeleteCarClickListener != null) {
+                    onDeleteCarClickListener.onDeleteCarClick(getAdapterPosition());
+                }
+            });
         }
 
         public void bind(Car car) {
@@ -67,4 +80,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         }
     }
 
+    public interface OnDeleteCarClickListener {
+        void onDeleteCarClick(int position);
+    }
 }

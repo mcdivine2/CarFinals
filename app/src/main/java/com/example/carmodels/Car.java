@@ -8,6 +8,11 @@ public class Car {
     private String carImage;
 
 
+
+    private String imagePath; // Adding imagePath field
+    private String id;
+
+
     // Empty constructor (required for Firestore)
     public Car() {}
     public Car(String carName, String carModel, String carYear, String carPrice, String carImage) {
@@ -23,6 +28,21 @@ public class Car {
         this.carModel = carModel;
         this.carYear = carYear;
         this.carPrice = carPrice;
+    }
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getCarImage() {
