@@ -1,41 +1,68 @@
 package com.example.carmodels;
 
 public class Car {
-    String name,model,year,price;
+    private String carName;
+    private String carModel;
+    private String carYear;
+    private String carPrice;
+    private String carImage;
 
-    public Car (String name, String model, String year, String price){
 
+    // Empty constructor (required for Firestore)
+    public Car() {}
+    public Car(String carName, String carModel, String carYear, String carPrice, String carImage) {
+        this.carName = carName;
+        this.carModel = carModel;
+        this.carYear = carYear;
+        this.carPrice = carPrice;
+        this.carImage = carImage;
     }
 
-    public String getName() {
-        return name;
+    public Car(String carName, String carModel, String carYear, String carPrice) {
+        this.carName = carName;
+        this.carModel = carModel;
+        this.carYear = carYear;
+        this.carPrice = carPrice;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getCarImage() {
+        return carImage;
     }
 
-    public String getModel() {
-        return model;
+    public void setCarImage(String carImage) {
+        this.carImage = carImage;
     }
 
-    public void setModel(String model) {
-        this.model = model;
+    public String getCarName() {
+        return carName;
     }
 
-    public String getYear() {
-        return year;
+    public void setCarName(String carName) {
+        this.carName = carName;
     }
 
-    public void setYear(String year) {
-        this.year = year;
+    public String getCarModel() {
+        return carModel;
     }
 
-    public String getPrice() {
-        return price;
+    public void setCarModel(String carModel) {
+        this.carModel = carModel;
     }
 
-    public void setPrice(String price) {
-        this.price = price;
+    public String getCarYear() {
+        return carYear;
+    }
+
+    public void setCarYear(String carYear) {
+        this.carYear = carYear;
+    }
+
+    public String getCarPrice() {
+        return carPrice;
+    }
+
+    public void setCarPrice(String carPrice) {
+        this.carPrice = carPrice;
     }
 }
+
