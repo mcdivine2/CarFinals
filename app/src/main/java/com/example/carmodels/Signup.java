@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -73,7 +74,7 @@ public class Signup extends AppCompatActivity {
         String userPassword = password.getText().toString();
         String userRetypePassword = retypePassword.getText().toString();
 
-        if (userName.isEmpty() ||nameofUser.isEmpty() || userEmail.isEmpty() || userPassword.isEmpty() || userRetypePassword.isEmpty()) {
+        if (userName.isEmpty() || nameofUser.isEmpty() || userEmail.isEmpty() || userPassword.isEmpty() || userRetypePassword.isEmpty()) {
             Toast.makeText(Signup.this, "Please fill in all the data", Toast.LENGTH_SHORT).show();
         } else if (!isValidEmail(userEmail)) {
             Toast.makeText(Signup.this, "Invalid email format", Toast.LENGTH_SHORT).show();
@@ -84,24 +85,11 @@ public class Signup extends AppCompatActivity {
         } else if (selectedImageUri == null) {
             Toast.makeText(Signup.this, "Please select a profile picture", Toast.LENGTH_SHORT).show();
         } else {
-            Map<String, Object> user = new HashMap<>();
-            user.put("userName", userName);
-            user.put("nameofUser", nameofUser);
-            user.put("userEmail", userEmail);
-            user.put("userPassword", userPassword);
-            CollectionReference userCollection = firestore.collection("user");
-            userCollection.add(user)
-                    .addOnSuccessListener(documentReference -> {
-                        String userID = documentReference.getId(); // Get the document ID
+            // Initialize Firebase Authentication instance
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-                        // Upload car image to Firebase Storage using the carId as a reference
-
-                    })
-                    .addOnFailureListener(e -> {
-                        // Log the error for debugging
-                        Log.e("Firestore", "Failed to add car: " + e.getMessage());
-                        Toast.makeText(this, "Failed to add car", Toast.LENGTH_SHORT).show();
-                    });
+            // Get a reference to Firestore
+            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
             mAuth.createUserWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener(task -> {
@@ -123,20 +111,37 @@ public class Signup extends AppCompatActivity {
                                 firebaseUser.updateProfile(profileUpdates)
                                         .addOnCompleteListener(profileUpdateTask -> {
                                             if (profileUpdateTask.isSuccessful()) {
-                                                // Upload the selected image to Firebase Storage
-                                                storageRef.putFile(selectedImageUri)
-                                                        .addOnSuccessListener(taskSnapshot -> {
-                                                            // Image uploaded successfully
-                                                            Toast.makeText(Signup.this, "Register Success!", Toast.LENGTH_SHORT).show();
+                                                // Map user data to be stored in Firestore
+                                                Map<String, Object> user = new HashMap<>();
+                                                user.put("userName", userName);
+                                                user.put("nameofUser", nameofUser);
+                                                user.put("userEmail", userEmail);
+                                                user.put("userPassword", userPassword);
 
-                                                            // Move intent to start the Login activity here, upon successful registration
-                                                            Intent intent = new Intent(Signup.this, Login.class);
-                                                            startActivity(intent);
-                                                            finish(); // Finish the current activity (Signup)
+                                                // Reference the Firestore collection and set the document ID as the Firebase UID
+                                                DocumentReference userDocRef = firestore.collection("user").document(userId);
+
+                                                userDocRef.set(user)
+                                                        .addOnSuccessListener(aVoid -> {
+                                                            // Upload the selected image to Firebase Storage
+                                                            storageRef.putFile(selectedImageUri)
+                                                                    .addOnSuccessListener(taskSnapshot -> {
+                                                                        // Image uploaded successfully
+                                                                        Toast.makeText(Signup.this, "Register Success!", Toast.LENGTH_SHORT).show();
+
+                                                                        // Move intent to start the Login activity here, upon successful registration
+                                                                        Intent intent = new Intent(Signup.this, Login.class);
+                                                                        startActivity(intent);
+                                                                        finish(); // Finish the current activity (Signup)
+                                                                    })
+                                                                    .addOnFailureListener(e -> {
+                                                                        // Handle unsuccessful image upload
+                                                                        Toast.makeText(Signup.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                                    });
                                                         })
                                                         .addOnFailureListener(e -> {
-                                                            // Handle unsuccessful image upload
-                                                            Toast.makeText(Signup.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                            // Handle the failure to set the document
+                                                            Toast.makeText(Signup.this, "Failed to add user data", Toast.LENGTH_SHORT).show();
                                                         });
                                             } else {
                                                 // Profile update failed
@@ -151,6 +156,7 @@ public class Signup extends AppCompatActivity {
                     });
         }
     }
+
 
 
     private boolean isValidPassword(String password) {

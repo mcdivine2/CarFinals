@@ -3,8 +3,9 @@ package com.example.carmodels;
 public class User {
     String name, email, password;
 
-    public User (String name, String email,String password) {
-
+    public User (String name,String password) {
+        name = this.name;
+        password = this.password;
     }
 
     public String getName() {
