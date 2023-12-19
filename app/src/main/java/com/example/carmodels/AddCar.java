@@ -93,6 +93,11 @@ public class AddCar extends AppCompatActivity {
                                                 model.setText("");
                                                 year.setText("");
                                                 price.setText("");
+                                                Intent intent = new Intent(AddCar.this, Dashboard.class);
+                                                startActivity(intent);
+
+                                                // Finish the current activity to prevent going back when pressing back button
+                                                finish();
                                             })
                                             .addOnFailureListener(e -> {
                                                 Toast.makeText(this, "Failed to add car image URL", Toast.LENGTH_SHORT).show();

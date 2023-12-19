@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,6 +30,8 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
     private FirebaseStorage storage;
     private StorageReference storageRef;
 
+    private Button addCar, userInfo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +49,10 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
         recyclerView.setAdapter(carAdapter);
 
         loadCarsFromFirestore();
+
+        btnInit();
+
+
 
     }
 
@@ -99,6 +108,28 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
                         Log.e("FirestoreError", "Error deleting car: " + e.getMessage());
                     });
         }
+    }
+
+    private  void btnInit(){
+        addCar = findViewById(R.id.btnAddCar);
+        userInfo = findViewById(R.id.btnUser);
+
+        addCar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Dashboard.this, AddCar.class);
+                startActivity(intent);
+
+            }
+        });
+        userInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Dashboard.this, UserInfo.class);
+                startActivity(intent);
+
+            }
+        });
     }
 
 }

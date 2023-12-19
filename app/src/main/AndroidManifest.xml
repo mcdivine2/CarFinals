@@ -16,6 +16,9 @@
         android:theme="@style/Theme.CarModels"
         tools:targetApi="31">
         <activity
+            android:name=".UserInfo"
+            android:exported="false" />
+        <activity
             android:name=".Dashboard"
             android:exported="false" />
         <activity
@@ -26,7 +29,7 @@
             android:exported="false" />
         <activity
             android:name=".Login"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

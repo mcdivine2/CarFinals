@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,11 +13,17 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import android.content.Intent;
 import android.net.Uri;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Signup extends AppCompatActivity {
@@ -24,9 +31,11 @@ public class Signup extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri selectedImageUri;
     private ImageView userImg;
-    private EditText name,email,password,retypePassword;
+    private EditText userName, name,email,password,retypePassword;
     private Button signNow;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore firestore;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +49,15 @@ public class Signup extends AppCompatActivity {
             openImageChooser(); // Open image chooser when the user clicks on the image view
         });
 
+        firestore = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
 
     }
 
     private void initViews() {
         userImg = findViewById(R.id.imgUserProfile);
 
+        userName = findViewById(R.id.txtUserName);
         name = findViewById(R.id.txtName);
         email = findViewById(R.id.txtEmail);
         password = findViewById(R.id.txtPassword);
@@ -55,55 +67,117 @@ public class Signup extends AppCompatActivity {
     }
 
     private void createUser() {
-        String userName = name.getText().toString();
+        String userName = this.userName.getText().toString();
+        String nameofUser = name.getText().toString();
         String userEmail = email.getText().toString();
         String userPassword = password.getText().toString();
         String userRetypePassword = retypePassword.getText().toString();
 
-        if (userName.isEmpty() || userEmail.isEmpty() || userPassword.isEmpty() || userRetypePassword.isEmpty()) {
+        if (userName.isEmpty() ||nameofUser.isEmpty() || userEmail.isEmpty() || userPassword.isEmpty() || userRetypePassword.isEmpty()) {
             Toast.makeText(Signup.this, "Please fill in all the data", Toast.LENGTH_SHORT).show();
         } else if (!isValidEmail(userEmail)) {
             Toast.makeText(Signup.this, "Invalid email format", Toast.LENGTH_SHORT).show();
         } else if (!isValidPassword(userPassword)) {
             Toast.makeText(Signup.this, "Password does not meet criteria", Toast.LENGTH_SHORT).show();
         } else if (!userPassword.equals(userRetypePassword)) {
-            Toast.makeText(Signup.this, "Password does not password doesn't match", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Signup.this, "Passwords don't match", Toast.LENGTH_SHORT).show();
         } else if (selectedImageUri == null) {
             Toast.makeText(Signup.this, "Please select a profile picture", Toast.LENGTH_SHORT).show();
         } else {
+            Map<String, Object> user = new HashMap<>();
+            user.put("userName", userName);
+            user.put("nameofUser", nameofUser);
+            user.put("userEmail", userEmail);
+            user.put("userPassword", userPassword);
+            CollectionReference userCollection = firestore.collection("user");
+            userCollection.add(user)
+                    .addOnSuccessListener(documentReference -> {
+                        String userID = documentReference.getId(); // Get the document ID
+
+                        // Upload car image to Firebase Storage using the carId as a reference
+                        StorageReference imageRef = storageReference.child("user_images/" + userID + ".jpg");
+                        imageRef.putFile(selectedImageUri)
+                                .addOnSuccessListener(taskSnapshot -> {
+                                    // Image uploaded successfully, now get the image URL
+                                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                                        String imageUrl = uri.toString();
+
+                                        // Update car document with image URL
+                                        documentReference.update("userImage", imageUrl)
+                                                .addOnSuccessListener(aVoid -> {
+                                                    Toast.makeText(this, "Car added successfully", Toast.LENGTH_SHORT).show();
+
+                                                    Intent intent = new Intent(Signup.this, Login.class);
+                                                    startActivity(intent);
+                                                    // Finish the current activity to prevent going back when pressing back button
+                                                    finish();
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Toast.makeText(this, "Failed to add car image URL", Toast.LENGTH_SHORT).show();
+                                                });
+                                    }).addOnFailureListener(e -> {
+                                        Toast.makeText(this, "Failed to get image URL", Toast.LENGTH_SHORT).show();
+                                    });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show();
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        // Log the error for debugging
+                        Log.e("Firestore", "Failed to add car: " + e.getMessage());
+                        Toast.makeText(this, "Failed to add car", Toast.LENGTH_SHORT).show();
+                    });
+
             mAuth.createUserWithEmailAndPassword(userEmail, userPassword)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                            String userId = firebaseUser.getUid();
+                            if (firebaseUser != null) {
+                                String userId = firebaseUser.getUid();
 
-                            // Create a reference to the Firebase Storage location for user's profile picture
-                            StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-                                    .child("users/" + userId + "/profile.jpg"); // Adjust file name and path as needed
+                                // Create a reference to the Firebase Storage location for user's profile picture
+                                StorageReference storageRef = FirebaseStorage.getInstance().getReference()
+                                        .child("users/" + userId + "/profile.jpg"); // Adjust file name and path as needed
 
-                            // Upload the selected image to Firebase Storage
-                            storageRef.putFile(selectedImageUri)
-                                    .addOnSuccessListener(taskSnapshot -> {
-                                        // Image uploaded successfully
-                                        Toast.makeText(Signup.this, "Image uploaded to Firebase Storage", Toast.LENGTH_SHORT).show();
+                                // Create UserProfileChangeRequest to include the user's name
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(nameofUser)
+                                        .build();
 
-                                        // Move intent to start the Login activity here, upon successful registration
-                                        Intent intent = new Intent(Signup.this, Login.class);
-                                        startActivity(intent);
-                                        finish(); // Finish the current activity (Signup)
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Handle unsuccessful image upload
-                                        Toast.makeText(Signup.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    });
+                                // Update the user's profile with the provided name
+                                firebaseUser.updateProfile(profileUpdates)
+                                        .addOnCompleteListener(profileUpdateTask -> {
+                                            if (profileUpdateTask.isSuccessful()) {
+                                                // Upload the selected image to Firebase Storage
+                                                storageRef.putFile(selectedImageUri)
+                                                        .addOnSuccessListener(taskSnapshot -> {
+                                                            // Image uploaded successfully
+                                                            Toast.makeText(Signup.this, "Image uploaded to Firebase Storage", Toast.LENGTH_SHORT).show();
+
+                                                            // Move intent to start the Login activity here, upon successful registration
+                                                            Intent intent = new Intent(Signup.this, Login.class);
+                                                            startActivity(intent);
+                                                            finish(); // Finish the current activity (Signup)
+                                                        })
+                                                        .addOnFailureListener(e -> {
+                                                            // Handle unsuccessful image upload
+                                                            Toast.makeText(Signup.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        });
+                                            } else {
+                                                // Profile update failed
+                                                Toast.makeText(Signup.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
                         } else {
                             Toast.makeText(Signup.this, "Register Fail", Toast.LENGTH_SHORT).show();
                             // User creation failed, stay on the same activity for correction
                         }
                     });
         }
-
     }
+
 
     private boolean isValidPassword(String password) {
         // Regex pattern to enforce password requirements
