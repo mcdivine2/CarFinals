@@ -11,12 +11,17 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class Login extends AppCompatActivity {
 
     private EditText email, password;
     private Button signUp, logIn;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore firestore;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +31,9 @@ public class Login extends AppCompatActivity {
         initClickBtn();
 
         mAuth = FirebaseAuth.getInstance();
+
+        firestore = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference();
 
     }
 
@@ -37,6 +45,8 @@ public class Login extends AppCompatActivity {
             Toast.makeText(Login.this, "Please fill in all the data", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        
 
         mAuth.signInWithEmailAndPassword(userEmail, userPassword)
                 .addOnCompleteListener(task -> {

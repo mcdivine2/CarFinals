@@ -95,33 +95,7 @@ public class Signup extends AppCompatActivity {
                         String userID = documentReference.getId(); // Get the document ID
 
                         // Upload car image to Firebase Storage using the carId as a reference
-                        StorageReference imageRef = storageReference.child("user_images/" + userID + ".jpg");
-                        imageRef.putFile(selectedImageUri)
-                                .addOnSuccessListener(taskSnapshot -> {
-                                    // Image uploaded successfully, now get the image URL
-                                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                                        String imageUrl = uri.toString();
 
-                                        // Update car document with image URL
-                                        documentReference.update("userImage", imageUrl)
-                                                .addOnSuccessListener(aVoid -> {
-                                                    Toast.makeText(this, "Car added successfully", Toast.LENGTH_SHORT).show();
-
-                                                    Intent intent = new Intent(Signup.this, Login.class);
-                                                    startActivity(intent);
-                                                    // Finish the current activity to prevent going back when pressing back button
-                                                    finish();
-                                                })
-                                                .addOnFailureListener(e -> {
-                                                    Toast.makeText(this, "Failed to add car image URL", Toast.LENGTH_SHORT).show();
-                                                });
-                                    }).addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Failed to get image URL", Toast.LENGTH_SHORT).show();
-                                    });
-                                })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show();
-                                });
                     })
                     .addOnFailureListener(e -> {
                         // Log the error for debugging
@@ -153,7 +127,7 @@ public class Signup extends AppCompatActivity {
                                                 storageRef.putFile(selectedImageUri)
                                                         .addOnSuccessListener(taskSnapshot -> {
                                                             // Image uploaded successfully
-                                                            Toast.makeText(Signup.this, "Image uploaded to Firebase Storage", Toast.LENGTH_SHORT).show();
+                                                            Toast.makeText(Signup.this, "Register Success!", Toast.LENGTH_SHORT).show();
 
                                                             // Move intent to start the Login activity here, upon successful registration
                                                             Intent intent = new Intent(Signup.this, Login.class);
