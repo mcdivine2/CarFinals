@@ -14,12 +14,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 public class Login extends AppCompatActivity {
 
-    private EditText email, password;
+    private EditText  userName, password;
     private Button signUp, logIn;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
@@ -40,17 +41,33 @@ public class Login extends AppCompatActivity {
     }
 
     private void loginUser() {
-        String userEmail = email.getText().toString();
-        String userPassword = password.getText().toString();
+        String enteredUserName = this.userName.getText().toString();
+        String enteredPassword = password.getText().toString();
 
-        if (userEmail.isEmpty() || userPassword.isEmpty()) {
+        if (enteredUserName.isEmpty() || enteredPassword.isEmpty()) {
             Toast.makeText(Login.this, "Please fill in all the data", Toast.LENGTH_SHORT).show();
-            return;
+        } else {
+            // Determine the chosen login method (Firestore or Firebase Auth)
+            boolean useFirebaseAuth = true; // Set this based on user selection
+
+            if (useFirebaseAuth) {
+                // Attempt Firebase Authentication login
+                firebaseAuthLogin(enteredUserName, enteredPassword);
+            } else {
+                // Attempt Firestore-based login
+                firestoreLogin(enteredUserName, enteredPassword);
+            }
         }
-        mAuth.signInWithEmailAndPassword(userEmail, userPassword)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Login success
+    }
+
+    private void firebaseAuthLogin(String enteredUserName, String enteredPassword) {
+        // Firebase Authentication instance
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        mAuth.signInWithEmailAndPassword(enteredUserName, enteredPassword)
+                .addOnCompleteListener(authTask -> {
+                    if (authTask.isSuccessful()) {
+                        // Firebase Authentication login successful
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
 
@@ -59,13 +76,45 @@ public class Login extends AppCompatActivity {
                         startActivity(intent);
                         finish(); // Finish the login activity
                     } else {
-                        // Login failed
-                        Toast.makeText(Login.this, "Login Failed. Please check your credentials", Toast.LENGTH_SHORT).show();
+                        // Firebase Authentication login failed
+                        firestoreLogin(enteredUserName, enteredPassword);
                     }
                 });
     }
+
+    private void firestoreLogin(String enteredUserName, String enteredPassword) {
+        // Reference to Firestore collection "user"
+        CollectionReference userCollection = FirebaseFirestore.getInstance().collection("user");
+
+        // Query to find the user document with the entered username
+        userCollection.whereEqualTo("userName", enteredUserName)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Retrieve the user document and compare passwords
+                        String storedPassword = document.getString("userPassword");
+                        if (storedPassword != null && storedPassword.equals(enteredPassword)) {
+                            // Passwords match, Firestore-based login successful
+                            Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+                            // Proceed to the home screen or desired activity upon successful login
+                            Intent intent = new Intent(Login.this, Dashboard.class);
+                            startActivity(intent);
+                            finish(); // Finish the login activity
+                            return;
+                        }
+                    }
+                    // No matching user found or incorrect password
+                    Toast.makeText(Login.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Error handling for the Firestore query
+                    Toast.makeText(Login.this, "Login Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void initViews() {
-        email = findViewById(R.id.txtEmail);
+        userName = findViewById(R.id.txtEmail);
         password = findViewById(R.id.txtPassword);
 
         signUp = findViewById(R.id.btnSignUp);
