@@ -86,7 +86,6 @@ public class Login extends AppCompatActivity {
         // Reference to Firestore collection "user"
         CollectionReference userCollection = FirebaseFirestore.getInstance().collection("user");
 
-        // Query to find the user document with the entered username
         userCollection.whereEqualTo("userName", enteredUserName)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -97,11 +96,27 @@ public class Login extends AppCompatActivity {
                             // Passwords match, Firestore-based login successful
                             Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
 
-                            // Proceed to the home screen or desired activity upon successful login
-                            Intent intent = new Intent(Login.this, Dashboard.class);
-                            startActivity(intent);
-                            finish(); // Finish the login activity
-                            return;
+                            // Get the user's email from Firestore
+                            String userEmail = document.getString("userEmail");
+
+                            // Sign in with Firebase Authentication using the retrieved email and password
+                            FirebaseAuth.getInstance().signInWithEmailAndPassword(userEmail, enteredPassword)
+                                    .addOnCompleteListener(authTask -> {
+                                        if (authTask.isSuccessful()) {
+                                            // Firebase Authentication login successful
+                                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                            Toast.makeText(Login.this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+                                            // Proceed to the home screen or desired activity upon successful login
+                                            Intent intent = new Intent(Login.this, Dashboard.class);
+                                            startActivity(intent);
+                                            finish(); // Finish the login activity
+                                        } else {
+                                            // Firebase Authentication login failed
+                                            Toast.makeText(Login.this, "Firebase Authentication Failed", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                            return; // Exit loop as the user is found
                         }
                     }
                     // No matching user found or incorrect password
@@ -112,6 +127,8 @@ public class Login extends AppCompatActivity {
                     Toast.makeText(Login.this, "Login Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+
 
     private void initViews() {
         userName = findViewById(R.id.txtEmail);
