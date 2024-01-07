@@ -34,7 +34,7 @@
                     android:id="@+id/txtCarName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name" />
+                    android:hint="Name of Project" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -45,7 +45,7 @@
                     android:id="@+id/txtCarModel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Model" />
+                    android:hint="Category" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -56,7 +56,7 @@
                     android:id="@+id/txtCarYear"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Year" />
+                    android:hint="Unit" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
