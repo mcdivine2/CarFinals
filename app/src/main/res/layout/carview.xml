@@ -57,6 +57,12 @@
                 android:text="Car Price:"
                 android:textSize="16sp" />
 
+            <ImageView
+                android:id="@+id/imgQRcode"
+                android:layout_width="match_parent"
+                android:layout_height="83dp"
+                app:srcCompat="@drawable/model" />
+
             <Button
                 android:id="@+id/btnDeleteCar"
                 android:layout_width="wrap_content"

@@ -79,12 +79,6 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
         String carImagePath = carToDelete.getCarImage();
         String carId = carToDelete.getId();
 
-        StorageReference qrCodeRef = storage.getReference().child("qr_codes/" + carId + ".png");
-        qrCodeRef.delete().addOnFailureListener(e -> {
-            // Handle failure to delete QR code
-            Log.e("FirebaseStorageError", "Error deleting QR code: " + e.getMessage());
-        });
-
         // Delete car image (if exists)
         if (carImagePath != null && !carImagePath.isEmpty()) {
             StorageReference imageRef = storage.getReferenceFromUrl(carImagePath);
