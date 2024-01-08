@@ -3,6 +3,8 @@ package com.example.carmodels;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +17,12 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -84,6 +91,8 @@ public class AddCar extends AppCompatActivity {
                                 imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                                     String imageUrl = uri.toString();
 
+                                    generateAndSaveQRCode(carId,carName,carModel,carYear,carPrice);
+
                                     // Update car document with image URL
                                     documentReference.update("carImage", imageUrl)
                                             .addOnSuccessListener(aVoid -> {
@@ -116,6 +125,51 @@ public class AddCar extends AppCompatActivity {
                     Toast.makeText(this, "Failed to add car", Toast.LENGTH_SHORT).show();
                 });
     }
+
+    private void generateAndSaveQRCode(String carId, String carName, String carModel, String carYear, String carPrice) {
+        // Generate QR code based on car details
+        String carDetails = "Name of car: " + carName +
+                "\nCar Model: " + carModel +
+                "\nCar Year: " + carYear +
+                "\nCar Price: " + carPrice;
+
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        try {
+            BitMatrix bitMatrix = qrCodeWriter.encode(carDetails, BarcodeFormat.QR_CODE, 300, 300);
+
+            // Convert BitMatrix to Bitmap
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                }
+            }
+
+            // Convert Bitmap to byte array (PNG)
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            byte[] bitmapData = baos.toByteArray();
+
+            // Upload QR code image to Firebase Storage using the carId as a reference
+            StorageReference qrCodeRef = storageReference.child("qr_codes/" + carId + ".png");
+            qrCodeRef.putBytes(bitmapData)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // QR code image uploaded successfully
+                        // You can add further actions if needed
+                    })
+                    .addOnFailureListener(e -> {
+                        // Handle failure in uploading QR code image
+                        Toast.makeText(this, "Failed to upload QR code image", Toast.LENGTH_SHORT).show();
+                    });
+
+        } catch (WriterException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void openImageChooser() {
         Intent intent = new Intent();

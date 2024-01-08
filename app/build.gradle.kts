@@ -53,6 +53,9 @@ dependencies {
 
     implementation ("com.squareup.picasso:picasso:2.71828")
 
+    implementation ("com.google.zxing:core:3.4.1")
+
+
 
 
 
