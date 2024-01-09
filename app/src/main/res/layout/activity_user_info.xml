@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".UserInfo">
+    android:background="#000000"> <!-- Setting a black background -->
 
     <ScrollView
         android:layout_width="match_parent"
@@ -16,27 +16,37 @@
             android:layout_gravity="center"
             android:layout_margin="20dp"
             android:orientation="vertical"
-            android:paddingBottom="20dp">
+            android:paddingBottom="20dp"
+            android:background="@drawable/rounded_bg"> <!-- Adding a rounded background -->
 
             <ImageView
                 android:id="@+id/imgUserProfile"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:background="@drawable/image_rounded_bg" /> <!-- Setting a rounded border for the image -->
 
             <TextView
                 android:id="@+id/txtUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="User Name" />
+                android:text="User Name"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp" />
 
             <TextView
                 android:id="@+id/txtUserEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Email" />
+                android:text="Email"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp" />
 
         </LinearLayout>
     </ScrollView>
@@ -45,28 +55,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/bottom_bar_bg"> <!-- Adding a gradient background to bottom bar -->
 
         <Button
             android:id="@+id/btnLogOut"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Log Out" />
+            android:text="Log Out"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_bg" /> <!-- Styling buttons with rounded corners and background -->
 
         <Button
             android:id="@+id/btnHome"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Home" />
+            android:text="Home"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_bg" />
 
         <Button
             android:id="@+id/btnAddCar"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Add Car" />
+            android:text="Add Car"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_bg" />
 
     </LinearLayout>
 

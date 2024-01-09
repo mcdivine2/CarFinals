@@ -74,10 +74,10 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         }
 
         public void bind(Car car, ImageView qrCodeImageView) {
-            carNameTextView.setText(car.getCarName());
-            carModelTextView.setText(car.getCarModel());
-            carYearTextView.setText(car.getCarYear());
-            carPriceTextView.setText(car.getCarPrice());
+            carNameTextView.setText("Name: "+car.getCarName());
+            carModelTextView.setText("Brand: "+car.getCarModel());
+            carYearTextView.setText("Year: "+car.getCarYear());
+            carPriceTextView.setText("Price: "+car.getCarPrice());
 
 
             if (car.getCarImage() != null && !car.getCarImage().isEmpty()) {
