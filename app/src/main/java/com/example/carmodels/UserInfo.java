@@ -39,8 +39,11 @@ public class UserInfo extends AppCompatActivity {
         btnLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut(); // Add this line to sign out the user
                 Intent intent = new Intent(UserInfo.this, Login.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                finish(); // Finish the current activity to prevent going back
             }
         });
         btnHome.setOnClickListener(new View.OnClickListener() {
