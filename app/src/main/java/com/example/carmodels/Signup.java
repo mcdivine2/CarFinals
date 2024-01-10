@@ -130,9 +130,11 @@ public class Signup extends AppCompatActivity {
                                                                         Toast.makeText(Signup.this, "Register Success!", Toast.LENGTH_SHORT).show();
 
                                                                         // Move intent to start the Login activity here, upon successful registration
+                                                                        FirebaseAuth.getInstance().signOut(); // Add this line to sign out the user
                                                                         Intent intent = new Intent(Signup.this, Login.class);
+                                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                                         startActivity(intent);
-                                                                        finish(); // Finish the current activity (Signup)
+                                                                        finish(); // Finish the current activity to prevent going back // Finish the current activity (Signup)
                                                                     })
                                                                     .addOnFailureListener(e -> {
                                                                         // Handle unsuccessful image upload
