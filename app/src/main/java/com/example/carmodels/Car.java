@@ -84,5 +84,6 @@ public class Car {
     public void setCarPrice(String carPrice) {
         this.carPrice = carPrice;
     }
+
 }
 

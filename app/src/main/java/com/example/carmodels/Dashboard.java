@@ -19,6 +19,15 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.speech.RecognizerIntent;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Locale;
+
+
 // ... (existing imports)
 
 public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteCarClickListener {
@@ -30,7 +39,7 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
     private FirebaseStorage storage;
     private StorageReference storageRef;
 
-    private Button addCar, userInfo;
+    private Button addCar, userInfo, filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,27 +120,120 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
         }
     }
 
-    private  void btnInit(){
+    private void btnInit(){
         addCar = findViewById(R.id.btnAddCar);
         userInfo = findViewById(R.id.btnUser);
+        filter = findViewById(R.id.filter); // Add filter button
 
         addCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Dashboard.this, AddCar.class);
                 startActivity(intent);
-
             }
         });
+
         userInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Dashboard.this, UserInfo.class);
                 startActivity(intent);
+            }
+        });
 
+        filter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startVoiceRecognition();
             }
         });
     }
+    private void startVoiceRecognition() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak the car name...");
+
+        try {
+            startActivityForResult(intent, 1);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(Dashboard.this, "Speech recognition not supported on your device", Toast.LENGTH_SHORT).show();
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK && null != data) {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (result != null && !result.isEmpty()) {
+                    String spokenText = result.get(0);
+                    filterRecyclerView(spokenText);
+                }
+            }
+        }
+    }
+
+    private void filterRecyclerView(String searchText) {
+        List<Car> filteredList = new ArrayList<>();
+        List<Car> nonMatchingList = new ArrayList<>();
+
+        for (Car car : carList) {
+            String carName = car.getCarName().toLowerCase();
+            searchText = searchText.toLowerCase();
+
+            if (carName.contains(searchText)) {
+                // Partial match found, add to the list
+                filteredList.add(car);
+            } else {
+                int distance = calculateLevenshteinDistance(carName, searchText);
+                // Adjust the threshold value based on your preference
+                if (distance <= 4) {
+                    // Close match found, add to the list
+                    filteredList.add(car);
+                } else {
+                    nonMatchingList.add(car);
+                }
+            }
+        }
+
+        // Add the non-matching cars to the filtered list
+        filteredList.addAll(nonMatchingList);
+
+        carAdapter.filterList(filteredList);
+    }
+
+
+    private int calculateLevenshteinDistance(String s1, String s2) {
+        int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+
+        for (int i = 0; i <= s1.length(); i++) {
+            for (int j = 0; j <= s2.length(); j++) {
+                if (i == 0) {
+                    dp[i][j] = j;
+                } else if (j == 0) {
+                    dp[i][j] = i;
+                } else {
+                    dp[i][j] = min(
+                            dp[i - 1][j - 1] + (s1.charAt(i - 1) == s2.charAt(j - 1) ? 0 : 1),
+                            dp[i - 1][j] + 1,
+                            dp[i][j - 1] + 1
+                    );
+                }
+            }
+        }
+
+        return dp[s1.length()][s2.length()];
+    }
+
+    private int min(int a, int b, int c) {
+        return Math.min(Math.min(a, b), c);
+    }
+
+
+
+
 
 }
 

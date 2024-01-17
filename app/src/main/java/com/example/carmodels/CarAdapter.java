@@ -119,4 +119,8 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
     public interface OnDeleteCarClickListener {
         void onDeleteCarClick(int position);
     }
+    public void filterList(List<Car> filteredList) {
+        carList = filteredList;
+        notifyDataSetChanged();
+    }
 }
