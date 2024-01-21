@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUser currentUser = mAuth.getCurrentUser();
                 if (currentUser != null) {
                     // User is already signed in, redirect to HomeActivity
-                    startActivity(new Intent(MainActivity.this, Dashboard.class));
+                    startActivity(new Intent(MainActivity.this, Dashboard2.class));
                     finish();
                 } else {
                     // No user signed in, redirect to Login activity
