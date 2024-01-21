@@ -39,7 +39,7 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
     private FirebaseStorage storage;
     private StorageReference storageRef;
 
-    private Button addCar, userInfo, filter;
+    private Button home, userInfo, filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,14 +121,14 @@ public class Dashboard extends AppCompatActivity implements CarAdapter.OnDeleteC
     }
 
     private void btnInit(){
-        addCar = findViewById(R.id.btnAddCar);
+        home = findViewById(R.id.home);
         userInfo = findViewById(R.id.btnUser);
         filter = findViewById(R.id.filter); // Add filter button
 
-        addCar.setOnClickListener(new View.OnClickListener() {
+        home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Dashboard.this, AddCar.class);
+                Intent intent = new Intent(Dashboard.this, Dashboard2.class);
                 startActivity(intent);
             }
         });
